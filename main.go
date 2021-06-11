@@ -13,8 +13,8 @@ var winWidth, winHeight int32 = 800, 600
 var diff int32 = 50
 var spacing int32 = 70
 var height int32 = 50
-var yoff int32 = winHeight - height - 50 
-var block_count int32 = 4
+var yoff int32 = winHeight - height - 30 
+var block_count int32 = 10
 
 func push(s []int, v int) []int {
 	return append(s, v)
@@ -23,7 +23,8 @@ func push(s []int, v int) []int {
 func pop(s []int) ([]int, int) {
 	l := len(s)
 	if l == 0 {
-		panic("stack empty")
+		fmt.Println("stack empty")
+		return []int{}, 0
 	}
 	return  s[:l-1], s[l-1]
 } 
@@ -53,17 +54,16 @@ func drawTowers(t [][]int, r *sdl.Renderer) {
 }
 
 func moveBlock(counter int32, towers [][]int) [][]int {
-	// if i%3 == 1: legal movement of top disk between source pole and destination pole
-	// if i%3 == 2: legal movement top disk between source pole and auxiliary pole
-	// if i%3 == 0: legal movement top disk between auxiliary pole and destination poles
 	legalMove := func(src, dst int, t [][]int) [][]int {
 		var s int
 		if len(t[src]) == 0 || len(t[dst]) == 0 {
 			if len(t[src]) > len(t[dst]) {
 				t[src], s = pop(t[src])
+				if s == 0 {return t}
 				t[dst] = push(t[dst], s)
 			} else {
 				t[dst], s = pop(t[dst])
+				if s == 0 {return t}
 				t[src] = push(t[src], s)
 			}
 			return t
@@ -109,7 +109,7 @@ func run() int {
 	defer renderer.Destroy()
 
 	var towers [][]int
-	tower1 := []int{4, 3, 2, 1}
+	tower1 := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
 	tower2 := []int{}
 	tower3 := []int{}
 
@@ -117,7 +117,7 @@ func run() int {
 	towers = append(towers, tower2)
 	towers = append(towers, tower3)
 
-	move_count := int32(math.Pow(2, float64(block_count)) - 1)
+	move_count := int32(math.Pow(2, float64(block_count)))
 	move_counter := int32(1)
 	running := true
 	for running {
@@ -130,15 +130,15 @@ func run() int {
 		renderer.SetDrawColor(0, 0, 0, 255)
 		renderer.Clear()
 
-		drawTowers(towers, renderer)
-		towers = moveBlock(move_counter, towers)
 		if move_count >= move_counter {
+			towers = moveBlock(move_counter, towers)
 			move_counter++
-		}
+		} 
+		drawTowers(towers, renderer)
 
 		renderer.Present()
 		// sdl.Delay(16)
-		sdl.Delay(500)
+		sdl.Delay(11)
 	}
 
 	return 0
@@ -147,12 +147,3 @@ func run() int {
 func main() {
 	os.Exit(run())
 }
-
-// TODO:
-// 1. Calculate the total number of moves required i.e. "pow(2, n) - 1" here n is number of disks.
-// 2. If number of disks (i.e. n) is even then interchange destination pole and auxiliary pole.
-// 3. for i = 1 to total number of moves:
-// 4. if i%3 == 1: legal movement of top disk between source pole and destination pole
-// 5. if i%3 == 2: legal movement top disk between source pole and auxiliary pole
-// 6. if i%3 == 0: legal movement top disk between auxiliary pole and destination poles
-
