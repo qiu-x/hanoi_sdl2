@@ -9,11 +9,11 @@ import (
 
 var winTitle string = "Hanoi-SDL2"
 var winWidth, winHeight int32 = 800, 600
+var yoff int32 = winHeight - height - 30 
 
 var diff int32 = 50
 var spacing int32 = 70
 var height int32 = 50
-var yoff int32 = winHeight - height - 30 
 
 // Here you can change the number of blocks
 var block_count int32 = 10
@@ -99,7 +99,7 @@ func run() int {
 	var renderer *sdl.Renderer
 
 	window, err := sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		winWidth, winHeight, sdl.WINDOW_SHOWN)
+		winWidth, winHeight, sdl.WINDOW_SHOWN | sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create window: %s\n", err)
 		return 1
@@ -127,6 +127,8 @@ func run() int {
 	move_counter := int32(1)
 	running := true
 	for running {
+		winWidth, winHeight = window.GetSize()
+		yoff = winHeight - height - 30 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
