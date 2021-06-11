@@ -14,7 +14,12 @@ var diff int32 = 50
 var spacing int32 = 70
 var height int32 = 50
 var yoff int32 = winHeight - height - 30 
+
+// Here you can change the number of blocks
 var block_count int32 = 10
+
+// This value is the delay between the moves
+var delay uint32 = 11
 
 func push(s []int, v int) []int {
 	return append(s, v)
@@ -109,13 +114,14 @@ func run() int {
 	defer renderer.Destroy()
 
 	var towers [][]int
-	tower1 := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
-	tower2 := []int{}
-	tower3 := []int{}
+	tower := []int{}
+	for i := int(block_count); i > 0; i-- {
+		tower = push(tower, i)
+	}
 
-	towers = append(towers, tower1)
-	towers = append(towers, tower2)
-	towers = append(towers, tower3)
+	towers = append(towers, tower)
+	towers = append(towers, []int{})
+	towers = append(towers, []int{})
 
 	move_count := int32(math.Pow(2, float64(block_count)))
 	move_counter := int32(1)
@@ -138,7 +144,7 @@ func run() int {
 
 		renderer.Present()
 		// sdl.Delay(16)
-		sdl.Delay(11)
+		sdl.Delay(delay)
 	}
 
 	return 0
