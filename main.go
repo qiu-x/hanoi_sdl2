@@ -1,5 +1,3 @@
-// author: Jacky Boen
-
 package main
 
 import (
@@ -54,6 +52,43 @@ func drawTowers(t [][]int, r *sdl.Renderer) {
 	}
 }
 
+func moveBlock(counter int32, towers [][]int) [][]int {
+	// if i%3 == 1: legal movement of top disk between source pole and destination pole
+	// if i%3 == 2: legal movement top disk between source pole and auxiliary pole
+	// if i%3 == 0: legal movement top disk between auxiliary pole and destination poles
+	legalMove := func(src, dst int, t [][]int) [][]int {
+		var s int
+		if len(t[src]) == 0 || len(t[dst]) == 0 {
+			if len(t[src]) > len(t[dst]) {
+				t[src], s = pop(t[src])
+				t[dst] = push(t[dst], s)
+			} else {
+				t[dst], s = pop(t[dst])
+				t[src] = push(t[src], s)
+			}
+			return t
+		}
+		if towers[src][len(towers[src])-1] < towers[dst][len(towers[dst])-1] {
+			towers[src], s = pop(towers[src])
+			towers[dst] = push(towers[dst], s)
+		} else {
+			towers[dst], s = pop(towers[dst])
+			towers[src] = push(towers[src], s)
+		}
+		return t
+	}
+	if counter % 3 == 1 {
+		towers = legalMove(0, 2, towers)
+	}
+	if counter % 3 == 2 {
+		towers = legalMove(0, 1, towers)
+	}
+	if counter % 3 == 0 {
+		towers = legalMove(1, 2, towers)
+	}
+	return towers
+}
+
 func run() int {
 	var window *sdl.Window
 	var renderer *sdl.Renderer
@@ -83,7 +118,7 @@ func run() int {
 	towers = append(towers, tower3)
 
 	move_count := int32(math.Pow(2, float64(block_count)) - 1)
-	move_counter := int32(0)
+	move_counter := int32(1)
 	running := true
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -96,13 +131,14 @@ func run() int {
 		renderer.Clear()
 
 		drawTowers(towers, renderer)
+		towers = moveBlock(move_counter, towers)
 		if move_count >= move_counter {
 			move_counter++
 		}
-		
 
 		renderer.Present()
-		sdl.Delay(16)
+		// sdl.Delay(16)
+		sdl.Delay(500)
 	}
 
 	return 0
